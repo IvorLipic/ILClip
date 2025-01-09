@@ -4,8 +4,9 @@
               addUsingNamespaceToJuceHeader="0" jucerFormatVersion="1" version="0.0.1"
               companyName="FER" companyWebsite="www.fer.unizg.hr" bundleIdentifier="com.FER.ILClip"
               pluginFormats="buildAU,buildStandalone,buildVST3" pluginName="ILClip"
-              pluginDesc="Audioprogramming project at FER." pluginManufacturer="Ivor Lipi&#263;"
-              aaxIdentifier="com.FER.ILClip" pluginAUExportPrefix="ILClipAU">
+              pluginDesc="Audioprogramming project at FER." pluginManufacturer="Ivor Lipic"
+              aaxIdentifier="com.FER.ILClip" pluginAUExportPrefix="ILClipAU"
+              displaySplashScreen="1">
   <MAINGROUP id="aGYPfW" name="ILClip">
     <GROUP id="{59F0E408-6FF9-34D5-562C-F323AE59C240}" name="Source">
       <FILE id="mk2IZB" name="PluginProcessor.cpp" compile="1" resource="0"

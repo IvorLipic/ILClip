@@ -1,9 +1,7 @@
 /*
   ==============================================================================
 
-    WaveformDisplay.h
-    Created: 7 Jan 2025 12:19:12am
-    Author:  Ivor
+    This project was inspired by https://gvst.uk/Downloads/GClip
 
   ==============================================================================
 */
@@ -16,7 +14,7 @@
 //==============================================================================
 /*
 */
-class WaveformDisplay  : public juce::Component
+class WaveformDisplay  : public juce::Component, private juce::Timer
 {
 public:
     WaveformDisplay(ILClipAudioProcessor& p);
@@ -24,15 +22,15 @@ public:
 
     void paint (juce::Graphics&) override;
     void resized() override;
-    void updateWaveform(const juce::AudioBuffer<float>& buffer, float newThreshold);
+    
 
 private:
     ILClipAudioProcessor& processor;
-    juce::CriticalSection updateLock;
-
-    juce::AudioBuffer<float> waveformBuffer;
     float threshold = 0.0f;
-    std::atomic<bool> needsRepaint{ false };
+    juce::AudioBuffer<float> displayBuffer;
+
+    void updateWaveform();
+    void timerCallback() override;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WaveformDisplay)
 };

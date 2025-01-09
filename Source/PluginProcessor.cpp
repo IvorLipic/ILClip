@@ -93,6 +93,8 @@ void ILClipAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock
 {
     // Use this method as the place to do any pre-playback
     // initialisation that you need..
+
+    circularBuffer.setSize(1, sampleRate); // Mono, 1 second
 }
 
 void ILClipAudioProcessor::releaseResources()
@@ -128,6 +130,7 @@ bool ILClipAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts) c
 #endif
 
 // Clipping functions
+//==============================================================================
 float ILClipAudioProcessor::hardClip(float sample, float threshold)
 {
     if (sample > threshold)
@@ -155,7 +158,7 @@ float ILClipAudioProcessor::polynomialSoftClip(float sample, float threshold)
         return x - (1.0f / 3.0f) * std::pow(x, 3.0f) * threshold;
     return (x > 0.0f ? 1.0f : -1.0f) * threshold;
 }
-
+//==============================================================================
 
 void ILClipAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 {
@@ -163,12 +166,18 @@ void ILClipAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce:
     auto totalNumInputChannels  = getTotalNumInputChannels();
     auto totalNumOutputChannels = getTotalNumOutputChannels();
 
+    int numSamples = buffer.getNumSamples();
+
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
-        buffer.clear (i, 0, buffer.getNumSamples());
+        buffer.clear (i, 0, numSamples);
+
+    // Buffer which is used by the editor
+    auto* circularBufferWritePointer = circularBuffer.getWritePointer(0);
+    int circularBufferSize = circularBuffer.getNumSamples();
 
     // Get parameters
-    float threshold = *tree.getRawParameterValue("Threshold");
-    int algorithmChoice = static_cast<int>(*tree.getRawParameterValue("AlgorithmChoice"));
+    float threshold = tree.getRawParameterValue("Threshold") -> load();
+    int algorithmChoice = static_cast<int>(tree.getRawParameterValue("AlgorithmChoice") -> load());
 
     // Process each channel
     for (int channel = 0; channel < totalNumInputChannels; ++channel)
@@ -176,9 +185,13 @@ void ILClipAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce:
         auto* channelData = buffer.getWritePointer (channel);
 
         // Process each sample
-        for (int sample = 0; sample < buffer.getNumSamples(); ++sample)
+        for (int sample = 0; sample < numSamples; ++sample)
         {
             float inputSample = channelData[sample];
+
+            // Write to the editors buffer
+            circularBufferWritePointer[(writePosition + sample) % circularBufferSize] = inputSample;
+
             switch (algorithmChoice)
             {
             case 0: // Hard Clip
@@ -198,11 +211,16 @@ void ILClipAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce:
             }
         }
     }
-    // Update the waveform display
+
+    writePosition = (writePosition + numSamples) % circularBufferSize;
+
+
+    /*
     if (auto* editor = dynamic_cast<ILClipAudioProcessorEditor*>(getActiveEditor()))
     {
         editor->getWaveformDisplay().updateWaveform(buffer, *tree.getRawParameterValue("Threshold"));
     }
+    */
 }
 
 //==============================================================================
@@ -261,6 +279,11 @@ juce::AudioProcessorValueTreeState::ParameterLayout ILClipAudioProcessor::create
         juce::StringArray{ "Hard Clip", "Soft Clip with Hyperbolic Tangent", "S-Shaped Sigmoid Clip", "Polynomial Soft Clip" },
         0));
     return layout;
+}
+
+const juce::AudioBuffer<float>& ILClipAudioProcessor::getWaveformBuffer()
+{
+    return circularBuffer;
 }
 
 //==============================================================================

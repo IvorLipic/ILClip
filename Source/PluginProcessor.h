@@ -56,12 +56,16 @@ public:
 public: 
     static juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
     juce::AudioProcessorValueTreeState tree{ *this, nullptr, "Parameters", createParameterLayout() };
+    const juce::AudioBuffer<float>& getWaveformBuffer();
 
 private:
     float hardClip(float sample, float threshold);
     float softClipTanh(float sample, float threshold);
     float sShapedSigmoid(float sample, float threshold);
     float polynomialSoftClip(float sample, float threshold);
+
+    juce::AudioBuffer<float> circularBuffer;
+    int writePosition = 0;
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ILClipAudioProcessor)
 };

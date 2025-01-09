@@ -10,7 +10,7 @@
 #include "PluginEditor.h"
 
 ILClipAudioProcessorEditor::ILClipAudioProcessorEditor (ILClipAudioProcessor& p)
-    : AudioProcessorEditor (&p), audioProcessor (p), waveformDisplay(p),
+    : AudioProcessorEditor (&p), audioProcessor (p), waveformDisplay (p),
     thresholdSlider_attachment(audioProcessor.tree, "Threshold", thresholdSlider),
     algorithmChoice_attachment(audioProcessor.tree, "AlgorithmChoice", algorithmChoice_comboBox)
 {
@@ -22,6 +22,7 @@ ILClipAudioProcessorEditor::ILClipAudioProcessorEditor (ILClipAudioProcessor& p)
     thresholdSlider_label.setJustificationType(juce::Justification::centred);
     thresholdSlider_label.attachToComponent(&thresholdSlider, false);
     
+    // Algorithm choice dropdown
     algorithmChoice_comboBox.addItemList({ "Hard Clip", "Soft Clip with Hyperbolic Tangent", 
                                            "S-Shaped Sigmoid Clip", "Polynomial Soft Clip" }, 1);
     addAndMakeVisible(algorithmChoice_comboBox);
@@ -29,6 +30,7 @@ ILClipAudioProcessorEditor::ILClipAudioProcessorEditor (ILClipAudioProcessor& p)
     algorithmChoice_label.setJustificationType(juce::Justification::centred);
     algorithmChoice_label.attachToComponent(&algorithmChoice_comboBox, false);
 
+    // Waveform display window
     addAndMakeVisible(waveformDisplay);
 }
 
@@ -41,6 +43,7 @@ void ILClipAudioProcessorEditor::paint (juce::Graphics& g)
     g.fillAll(getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
 }
 
+// Bounds
 void ILClipAudioProcessorEditor::resized()
 {
     auto bounds = getLocalBounds();
@@ -55,9 +58,4 @@ void ILClipAudioProcessorEditor::resized()
                                                       .removeFromBottom(0.3 * alg_choice_area.getHeight())
                                                       .reduced(5));
     waveformDisplay.setBounds(bounds.reduced(5));
-}
-
-WaveformDisplay& ILClipAudioProcessorEditor::getWaveformDisplay()
-{
-    return waveformDisplay;
 }
