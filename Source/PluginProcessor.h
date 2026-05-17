@@ -62,7 +62,6 @@ private:
     float hardClip(float sample, float threshold);
     float softClipTanh(float sample, float threshold);
     float sShapedSigmoid(float sample, float threshold);
-    float polynomialSoftClip(float sample, float threshold);
 
     juce::AudioBuffer<float> circularBuffer;
     int writePosition = 0;

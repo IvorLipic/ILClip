@@ -17,18 +17,32 @@ ILClipAudioProcessorEditor::ILClipAudioProcessorEditor (ILClipAudioProcessor& p)
     setSize(600, 400);
 
     // Threshold slider
+    thresholdSlider.setSliderStyle(juce::Slider::SliderStyle::LinearBar);
     addAndMakeVisible(thresholdSlider);
     thresholdSlider_label.setText("Threshold", juce::dontSendNotification);
     thresholdSlider_label.setJustificationType(juce::Justification::centred);
     thresholdSlider_label.attachToComponent(&thresholdSlider, false);
     
     // Algorithm choice dropdown
-    algorithmChoice_comboBox.addItemList({ "Hard Clip", "Soft Clip with Hyperbolic Tangent", 
-                                           "S-Shaped Sigmoid Clip", "Polynomial Soft Clip" }, 1);
+    //==============================================================================
+    juce::StringArray choices = { "Hard Clip", "Soft Clip with Hyperbolic Tangent",
+                                  "S-Shaped Sigmoid Clip" };
+
+    algorithmChoice_comboBox.addItemList(choices, 1);
+    
+    auto* paramValue = audioProcessor.tree.getRawParameterValue("AlgorithmChoice");
+    if (paramValue != nullptr) {
+        int index = static_cast<int>(paramValue->load());
+        if (index >= 0 && index < choices.size()) {
+            algorithmChoice_comboBox.setSelectedId(algorithmChoice_comboBox.getItemId(index), juce::dontSendNotification);
+        }
+        else {
+            algorithmChoice_comboBox.setTextWhenNothingSelected("Select an Algorithm");
+        }
+    }
+
     addAndMakeVisible(algorithmChoice_comboBox);
-    algorithmChoice_label.setText("Clipping algorithm", juce::dontSendNotification);
-    algorithmChoice_label.setJustificationType(juce::Justification::centred);
-    algorithmChoice_label.attachToComponent(&algorithmChoice_comboBox, false);
+    //==============================================================================
 
     // Waveform display window
     addAndMakeVisible(waveformDisplay);

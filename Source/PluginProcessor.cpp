@@ -150,14 +150,6 @@ float ILClipAudioProcessor::sShapedSigmoid(float sample, float threshold)
     float x = sample / threshold;
     return (x / (1.0f + std::abs(x))) * threshold;
 }
-
-float ILClipAudioProcessor::polynomialSoftClip(float sample, float threshold)
-{
-    float x = sample / threshold;
-    if (std::abs(x) <= 1.0f)
-        return x - (1.0f / 3.0f) * std::pow(x, 3.0f) * threshold;
-    return (x > 0.0f ? 1.0f : -1.0f) * threshold;
-}
 //==============================================================================
 
 void ILClipAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
@@ -202,9 +194,6 @@ void ILClipAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce:
                 break;
             case 2: // S-Shaped Sigmoid Clip
                 channelData[sample] = sShapedSigmoid(inputSample, threshold);
-                break;
-            case 3: // Polynomial Soft Clip
-                channelData[sample] = polynomialSoftClip(inputSample, threshold);
                 break;
             default:
                 break;
@@ -265,7 +254,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout ILClipAudioProcessor::create
         "Threshold",
         "Threshold",
         juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f, 1.0f),
-        0.0f));
+        0.8f));
     /*
     layout.add(std::make_unique<juce::AudioParameterBool>(
         "UseNoteDuration",
@@ -276,7 +265,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout ILClipAudioProcessor::create
     layout.add(std::make_unique<juce::AudioParameterChoice>(
         "AlgorithmChoice",
         "AlgorithmChoice",
-        juce::StringArray{ "Hard Clip", "Soft Clip with Hyperbolic Tangent", "S-Shaped Sigmoid Clip", "Polynomial Soft Clip" },
+        juce::StringArray{ "Hard Clip", "Soft Clip with Hyperbolic Tangent", "S-Shaped Sigmoid Clip" },
         0));
     return layout;
 }
